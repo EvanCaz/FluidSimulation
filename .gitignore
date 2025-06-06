@@ -1,0 +1,16 @@
+#ignore everything
+*
+
+
+#unignore what we want to track
+!*.py
+!.gitignore
+# !*.csv
+# !*.jar
+!*.md
+!*.cpp
+!*.R
+!timeSeriesRndForest/
+
+# !*.zip
+# !Application/**
