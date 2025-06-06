@@ -117,10 +117,10 @@ public class Main extends JFrame {
                         List<Particle> neighbor = grid.get(new CellKey(ni, nj)); // particles in this specifci neighbor outof 8 neighbors
                         if (neighbor != null){
                             for (Particle pn : neighbor){
-                                double dx = p.x - pn.x, dy = p.y - pn.y; 
-                                double r = Math.sqrt(dx*dx + dy*dy);
+                                double dx = p.x - pn.x, dy = p.y - pn.y; //distance
+                                double r = Math.sqrt(dx*dx + dy*dy); // magnitutdwe
                                 if(r < radius) {
-                                    p.density += pn.mass * SPHKernels2D.poly6(r, radius);
+                                    p.density += pn.mass * SPHKernels2D.poly6(r, radius); // density formula
                                 }
                             }
                         }
@@ -141,30 +141,48 @@ public class Main extends JFrame {
                         if (neighbor != null){
                             for(Particle pn : neighbor){
                                 if(pn == p) continue; // skip self
+                                double dx = p.x - pn.x, dy = p.y - pn.y; // distance vectors
+                                double r = Math.sqrt(dx*dx + dy*dy); // magnitude
+                                if(r < radius && r > 0){
+                                    double gradW = SPHKernels2D.spikyGrad(r, radius); // magnitutde
+                                    double common = -pn.mass * (p.preassure + pn.preassure) / (2 * pn.density); // common factor
+                                    
+                                    p.ax += common * gradW * (dx / r);
+                                    p.ay += common * gradW * (dy / r); // adding acc
+                                
+                                    double lapW = SPHKernels2D.viscLaplacian(r, radius);
+                                    double dvx = pn.vx - p.vx, dvy = pn.vy - p.vy;
+                                    double viscosityFactor = viscCoeff * pn.mass / pn.density;
 
-
+                                    p.ax += viscosityFactor * lapW * dvx;
+                                    p.ay += viscosityFactor * lapW * dvy; // adding acc
+                                }
                             }
                         }
                     }
                 }
+                p.ay += gravity;
+                p.ax /= p.density;
+                p.ay /= p.density;
+            }
+        } 
+        
+        class CellKey {
+            public final int i, j;
+            public CellKey(int i, int j) { this.i = i; this.j = j; }
+            @Override
+            public boolean equals(Object o) {
+                if (!(o instanceof CellKey)) return false;
+                CellKey other = (CellKey) o;
+                return this.i == other.i && this.j == other.j;
+            }
+            @Override
+            public int hashCode() {
+                return 31 * i + j;
             }
         }
     }
     
-    class CellKey {
-        public final int i, j;
-        public CellKey(int i, int j) { this.i = i; this.j = j; }
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof CellKey)) return false;
-            CellKey other = (CellKey) o;
-            return this.i == other.i && this.j == other.j;
-        }
-        @Override
-        public int hashCode() {
-            return 31 * i + j;
-        }
-    }
 
     public class SPHKernels2D { // googled this
         private static final double PI = Math.PI;
