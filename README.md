@@ -36,3 +36,4 @@ Add additional notes about how to deploy this on a live system
 
 https://www.sci.utah.edu/publications/premoze03/ParticleFluidsHiRes.pdf
 https://matthias-research.github.io/pages/publications/sca03.pdf
+https://docs.oracle.com/javase/tutorial/uiswing/components/slider.html

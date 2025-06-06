@@ -17,12 +17,12 @@ public class Main extends JFrame {
     public Main() {
         super("Simulation");                        // set window title
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setSize(400, 300);
         SimulationPanel panel = new SimulationPanel();
         add(panel);                
         setVisible(true);
 
-        int delayMs = 16; // 60 fps
+        int delayMs = 8; // 60 fps
         new Timer(delayMs, e -> { // every 16ms this is called, redrawing the panel and calling the simulation
             panel.stepSimulation();
             panel.repaint();
@@ -36,15 +36,15 @@ public class Main extends JFrame {
     static class SimulationPanel extends JPanel{
         private final List<Particle> particles = new ArrayList<>(); // list of allthe partcles
         private final double hz = 0.016;
-        private final double radius = 5.0; // 16 pixel radius of interactivty
-        private final double restDensity = 10.0;
-        private final double gasConstant = 20.0; // for preassure calculati0ons
-        private final double viscCoeff = 15.0;
+        private final double radius = 16.0; // 16 pixel radius of interactivty
+        private final double restDensity = 1.0;
+        private final double gasConstant = 50.0; // for preassure calculati0ons
+        private final double viscCoeff = 250.0;
         private final double gravity = 9.81;
          private final Map<CellKey, List<Particle>> grid = new HashMap<>(); 
 
         public SimulationPanel(){
-            for(int i = 0; i < 10000; i++){ // change the total amount of particles
+            for(int i = 0; i < 2000; i++){ // change the total amount of particles
                 double x = 100 + (i % 20) * 7;
                 double y = 100 + (i / 20) * 5; // create them in a grid
                 particles.add(new Particle(x, y, 1.0)); // mass is constant
@@ -95,29 +95,34 @@ public class Main extends JFrame {
             }
         }
         
-        private void handleEdges(){
-            int width = getWidth(), height = getHeight();
-            double restitiution = .5;
-             double pr = 3; // draw radius
+        private void handleEdges() {
+            int width  = getWidth();
+            int height = getHeight();
+            double restitution = 0.5;
+            double pr = 3.0;  // particle draw‐radius
+
             for (Particle p : particles) {
+                // --- horizontal walls ---
                 if (p.x < pr) {
                     p.x  = pr;
-                    p.vx = -p.vx * restitiution;
-                }
-                if (p.x > width - pr) {
+                    p.vx = -p.vx * restitution;
+                } else if (p.x > width - pr) {
                     p.x  = width - pr;
-                    p.vx = -p.vx * restitiution;
+                    p.vx = -p.vx * restitution;
                 }
+
+                // --- vertical walls ---
                 if (p.y < pr) {
                     p.y  = pr;
-                    p.vy = -p.vy * restitiution;
-                }
-                if (p.y > height - pr) {
+                    p.vy = -p.vy * restitution;
+                } else if (p.y > height - pr) {
                     p.y  = height - pr;
-                    p.vy = -p.vy * restitiution;
+                    p.vy = -p.vy * restitution;
                 }
-    }
+            }
         }
+
+
         public void calcDensity(){ // find density for every particlle at every tiomestepo
             for (Particle p :particles){
                 p.density = 0; // calc from scratch
@@ -174,9 +179,9 @@ public class Main extends JFrame {
                         }
                     }
                 }
-                p.ay += gravity;
                 p.ax /= p.density;
                 p.ay /= p.density;
+                p.ay += gravity;
             }
         } 
         
@@ -197,25 +202,25 @@ public class Main extends JFrame {
     }
     
 
-    public class SPHKernels2D { // googled this
-        private static final double PI = Math.PI;
+    public class SPHKernels2D {
+    private static final double PI = Math.PI;
 
-        public static double poly6(double r, double h) {
-            if (r < 0 || r > h) return 0;
-            double coeff = 4.0 / (PI * Math.pow(h, 8));
-            return coeff * Math.pow(h*h - r*r, 3);
-        }
-
-        public static double spikyGrad(double r, double h) {
-            if (r <= 0 || r > h) return 0;
-            double coeff = -30.0 / (PI * Math.pow(h, 5));
-            return coeff * Math.pow(h - r, 2);
-        }
-
-        public static double viscLaplacian(double r, double h) {
-            if (r < 0 || r > h) return 0;
-            double coeff = 40.0 / (PI * Math.pow(h, 5));
-            return coeff * (h - r);
-        }
+    public static double poly6(double r, double h) {
+        if (r < 0 || r > h) return 0;
+        double coeff = 4.0 / (PI * Math.pow(h, 8));
+        return coeff * Math.pow(h*h - r*r, 3);
     }
+
+    public static double spikyGrad(double r, double h) {
+        if (r <= 0 || r > h) return 0;
+        double coeff = -45.0 / (PI * Math.pow(h, 6)); //exponent and constant error fixed here
+        return coeff * (h - r) * (h - r); 
+    }
+
+    public static double viscLaplacian(double r, double h) {
+        if (r < 0 || r > h) return 0;
+        double coeff = 45.0 / (PI * Math.pow(h, 6)); //exponent and constant error fixed here
+        return coeff * (h - r);
+    }
+}
 }
