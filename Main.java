@@ -61,10 +61,16 @@ public class Main extends JFrame {
         }
         
         public void stepSimulation(){ // make the hash, find densities, find preassure, find forces, integrate, handle the edges(reverse x y velocirtyt basically)
+            spatialHash();
+            calcDensity();
+            calcPressures();
+            calcForces();
+            integrate();
+            handleEdges();
 
         }
 
-        public void spatialHash(){
+        public void spatialHash(){ // efficiency
             grid.clear();
             for (Particle p : particles){
                 int ci = (int) Math.floor(p.x / radius);
@@ -80,10 +86,67 @@ public class Main extends JFrame {
             }
         }
 
+        private void integrate() {
+            for (Particle p : particles) {
+                p.vx += p.ax * hz;
+                p.vy += p.ay * hz;
+                p.x  += p.vx * hz;
+                p.y  += p.vy * hz;
+            }
+        }
+        
+        private void handleEdges(){
+            int width = getWidth(), height = getHeight();
+            double restitiution = .5;
+            for(Particle p : particles){
+                if(p.x < 0) { p.x = 0;       p.vx *= -restitiution; }
+                if(p.x > height) { p.x = width;       p.vx *= -restitiution; }
+                if(p.y < 0) { p.y = 0;       p.vy *= -restitiution; }
+                if(p.y > width) { p.y = height;       p.vy *= -restitiution; }
+            }
+        }
+        public void calcDensity(){ // find density for every particlle at every tiomestepo
+            for (Particle p :particles){
+                p.density = 0; // calc from scratch
+                int ci = (int)(p.x / radius), cj = (int)(p.y / radius);
+
+                for(int i = -1; i <= 1; i++){
+                    for(int j = -1; j <= 1; j++){ // loop over neighboring cells plus itself
+                        int ni = ci + i, nj = cj + j; // neighbor i and neighbor j are the current cell plus the loops incrementer
+                        // get the list of particles in the cell, if it is null, skip, other wise 
+                        List<Particle> neighbor = grid.get(new CellKey(ni, nj)); // particles in this specifci neighbor outof 8 neighbors
+                        if (neighbor != null){
+                            for (Particle pn : neighbor){
+                                double dx = p.x - pn.x, dy = p.y - pn.y; 
+                                double r = Math.sqrt(dx*dx + dy*dy);
+                                if(r < radius) {
+                                    p.density += pn.mass * SPHKernels2D.poly6(r, radius);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public void calcForces(){
             for(Particle p : particles){ // use all forces to find acceleration, so reset it to zero at the start
                 p.ax = 0; p.ay = 0; // each particle
+                int ci = (int)(p.x / radius), cj = (int)(p.y / radius); // find the cell thje particle we are it is in
+                
+                 for(int i = -1; i <= 1; i++){
+                    for(int j = -1; j <= 1; j++){ // all neighbors again, should be a function as this is repeated code, double forloop so this can be combined with aboce for efficiency
+                        int ni = ci + i, nj = cj + j;
+                        List<Particle> neighbor = grid.get(new CellKey(ni, nj));
+                        if (neighbor != null){
+                            for(Particle pn : neighbor){
+                                if(pn == p) continue; // skip self
 
+
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -100,6 +163,28 @@ public class Main extends JFrame {
         @Override
         public int hashCode() {
             return 31 * i + j;
+        }
+    }
+
+    public class SPHKernels2D { // googled this
+        private static final double PI = Math.PI;
+
+        public static double poly6(double r, double h) {
+            if (r < 0 || r > h) return 0;
+            double coeff = 4.0 / (PI * Math.pow(h, 8));
+            return coeff * Math.pow(h*h - r*r, 3);
+        }
+
+        public static double spikyGrad(double r, double h) {
+            if (r <= 0 || r > h) return 0;
+            double coeff = -30.0 / (PI * Math.pow(h, 5));
+            return coeff * Math.pow(h - r, 2);
+        }
+
+        public static double viscLaplacian(double r, double h) {
+            if (r < 0 || r > h) return 0;
+            double coeff = 40.0 / (PI * Math.pow(h, 5));
+            return coeff * (h - r);
         }
     }
 }
