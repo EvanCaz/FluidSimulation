@@ -3,14 +3,14 @@
 
 
 #unignore what we want to track
-!*.py
+!*.java
 !.gitignore
 # !*.csv
 # !*.jar
 !*.md
-!*.cpp
-!*.R
-!timeSeriesRndForest/
+# !*.cpp
+# !*.R
+# !timeSeriesRndForest/
 
 # !*.zip
 # !Application/**
