@@ -36,16 +36,16 @@ public class Main extends JFrame {
     static class SimulationPanel extends JPanel{
         private final List<Particle> particles = new ArrayList<>(); // list of allthe partcles
         private final double hz = 0.016;
-        private final double radius = 16.0; // 16 pixel radius of interactivty
-        private final double restDensity = 1000.0;
-        private final double gasConstant = 2000.0; // for preassure calculati0ons
-        private final double viscCoeff = 250.0;
+        private final double radius = 5.0; // 16 pixel radius of interactivty
+        private final double restDensity = 10.0;
+        private final double gasConstant = 20.0; // for preassure calculati0ons
+        private final double viscCoeff = 15.0;
         private final double gravity = 9.81;
          private final Map<CellKey, List<Particle>> grid = new HashMap<>(); 
 
         public SimulationPanel(){
-            for(int i = 0; i < 200; i++){ // change the total amount of particles
-                double x = 100 + (i % 20) * 5;
+            for(int i = 0; i < 10000; i++){ // change the total amount of particles
+                double x = 100 + (i % 20) * 7;
                 double y = 100 + (i / 20) * 5; // create them in a grid
                 particles.add(new Particle(x, y, 1.0)); // mass is constant
             }
@@ -98,12 +98,25 @@ public class Main extends JFrame {
         private void handleEdges(){
             int width = getWidth(), height = getHeight();
             double restitiution = .5;
-            for(Particle p : particles){
-                if(p.x < 0) { p.x = 0;       p.vx *= -restitiution; }
-                if(p.x > height) { p.x = width;       p.vx *= -restitiution; }
-                if(p.y < 0) { p.y = 0;       p.vy *= -restitiution; }
-                if(p.y > width) { p.y = height;       p.vy *= -restitiution; }
-            }
+             double pr = 3; // draw radius
+            for (Particle p : particles) {
+                if (p.x < pr) {
+                    p.x  = pr;
+                    p.vx = -p.vx * restitiution;
+                }
+                if (p.x > width - pr) {
+                    p.x  = width - pr;
+                    p.vx = -p.vx * restitiution;
+                }
+                if (p.y < pr) {
+                    p.y  = pr;
+                    p.vy = -p.vy * restitiution;
+                }
+                if (p.y > height - pr) {
+                    p.y  = height - pr;
+                    p.vy = -p.vy * restitiution;
+                }
+    }
         }
         public void calcDensity(){ // find density for every particlle at every tiomestepo
             for (Particle p :particles){
