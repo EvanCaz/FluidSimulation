@@ -128,10 +128,10 @@ class ForceTask extends RecursiveAction {
 class SimulationPanel extends JPanel {
     private final List<Particle> particles; // all particles 
     private final double hz = 0.016; // timestep in seconds 
-    private final double radius = 20.0; // interaction radius in pixels 
-    private final double restDensity = 0.5; // rest density for SPH 
-    private final double gasConstant = 5000.0; // pressure constant 
-    private final double viscCoeff = 250.0; // viscosity coefficient 
+    private final double radius = 10.0; // interaction radius in pixels 
+    private final double restDensity = 0.8; // rest density for SPH 
+    private final double gasConstant = 10000.0; // pressure constant 
+    private final double viscCoeff = 500.0; // viscosity coefficient 
     private final double gravity = 9.81; // gravity acceleration 
     private final Map<CellKey, List<Particle>> grid = new HashMap<>(); // spatial hash grid 
     private final int drawRadius = 6; // radius to draw each particle
@@ -228,7 +228,7 @@ class SimulationPanel extends JPanel {
         p.ay += gravity; // add gravity 
     }
 
-    // Integrate positions and velocities 
+    // integrate positions and velocities 
     public void integrate() {
         // precompute time step factor for efficiency
         final double stepFactor = hz;
@@ -244,7 +244,7 @@ class SimulationPanel extends JPanel {
     // Handle collisions with window edges 
     public void handleEdges() {
         int width = getWidth(), height = getHeight();
-        double restitution = 0.5;
+        double restitution = 0.7;
         double pr = drawRadius; // use draw radius so drawing and physics match
 
         for (Particle p : particles) {
