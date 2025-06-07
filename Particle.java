@@ -1,6 +1,6 @@
 public class Particle{
-    public double x, y; // position 
-    public double vx, vy; // velocity
+    volatile public double x, y; // position 
+    volatile public double vx, vy; // velocity
     public double ax, ay; // acceleartion
     public double density;
     public double preassure;
