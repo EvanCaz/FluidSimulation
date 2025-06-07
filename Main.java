@@ -217,9 +217,17 @@ class SimulationPanel extends JPanel {
         g.setColor(Color.BLACK);
         g.drawString(status, x, y);
 
+        final double maxSpeed = 200.0;
+
         for (Particle p : particles) {
-            g.setColor(Color.BLUE);
-    // draw each particle as a circle of diameter drawRadius*2
+            double speed = Math.hypot(p.vx, p.vy);
+            double t = speed / maxSpeed;
+            if(t>1) t = 1;
+            int red = (int)(255 * t);
+            int blue  = (int)(255 * (1 - t));
+
+            g.setColor(new Color(red,0,blue));
+            // draw each particle as a circle of diameter drawRadius*2
             g.fillOval((int)(p.x - drawRadius), (int)(p.y - drawRadius), 2 * drawRadius, 2 * drawRadius);
         }
     }
