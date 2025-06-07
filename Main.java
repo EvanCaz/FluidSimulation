@@ -13,11 +13,11 @@ public class Main extends JFrame {
     public Main() {
         super("Simulation"); // set window title 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300); // set window size in pixels 
+        setSize(400, 700); // set window size in pixels 
 
         // Initialize particles in a grid formation 
         for (int i = 0; i < 2000; i++) {                         
-            double x = 100 + (i % 20) * 7;
+            double x = 100 + (i % 20) * 5;
             double y = 100 + (i / 20) * 5;
             particles.add(new Particle(x, y, 10.0)); // mass is constant 
         }
@@ -191,7 +191,8 @@ class SimulationPanel extends JPanel {
     // Compute pressure from density for all particles 
     public void calcPressures() {
         for (Particle p : particles) {
-            p.preassure = gasConstant * (p.density - restDensity);
+            p.preassure = Math.max(0, gasConstant * (p.density - restDensity));
+
         }
     }
 
@@ -250,7 +251,11 @@ class SimulationPanel extends JPanel {
             if (p.x < pr) { p.x = pr; p.vx = -p.vx * restitution; }
             else if (p.x > width - pr) { p.x = width - pr; p.vx = -p.vx * restitution; }
             if (p.y < pr) { p.y = pr; p.vy = -p.vy * restitution; }
-            else if (p.y > height - pr) { p.y = height - pr; p.vy = -p.vy * restitution; }
+            else if (p.y > height - pr) { 
+                double penetration = p.y - (height - pr);
+                p.y -= penetration;
+                p.vy = -p.vy * restitution;
+            }
         }
     }
 
