@@ -6,7 +6,13 @@ The purpose of this project is to create a particle based fluid simulation in ja
 
 I want this to be created in java so it can be compiled and run wihtout external libraries or dependencies and even turned into executable. 
 
-Based on the papers I read, the particles in the simulation, AKA Smoother Particle Hydrodynamics(SPH), have five main attributes: velocity, acceleration, density, pressure, and the location. The calculate these properties, we only use the "quantities in a local neighborhood of each particle using radial symmetrical smoothing kernels". This circle is defined by us and helps limit the computations made as well as the spatial map for checking the closest 8 plus current grid for calculations not the entire window.
+Based on the papers I read, the particles in the simulation, AKA Smoother Particle Hydrodynamics(SPH), have five main attributes: velocity, acceleration, density, pressure, and the location. The calculate these properties, we only use the "quantities in a local neighborhood of each particle using radial symmetrical smoothing kernels". 
+
+Radius is defined by us and helps limit the area of interaction(so only the particles in this area effect density and forces) made as well as the spatial map for checking the closest 8 plus current grid for calculations not the entire window. 
+Rest density is the target density where no preassure is created, smaller means particles sit farther apart. 
+Gas Constant or sitffness controlls preassure scalling, large makes huge preassure forces aka incompressible, small does opposite. 
+Viscocity dampens interactions, higher means a "thicker" simulation. 
+Restituiton controls how particles interact with boundaries.
 
 ## Running the tests
 

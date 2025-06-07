@@ -13,11 +13,11 @@ public class Main extends JFrame {
     public Main() {
         super("Simulation"); // set window title 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 700); // set window size in pixels 
+        setSize(400, 1000); // set window size in pixels 
 
         // Initialize particles in a grid formation 
-        for (int i = 0; i < 2000; i++) {                         
-            double x = 100 + (i % 20) * 5;
+        for (int i = 0; i < 4000; i++) {                         
+            double x = 100 + (i % 20) * 7;
             double y = 100 + (i / 20) * 5;
             particles.add(new Particle(x, y, 10.0)); // mass is constant 
         }
@@ -60,7 +60,7 @@ public class Main extends JFrame {
 
 // recursive for computing density in parallel
 class DensityTask extends RecursiveAction {
-    private static final int THRESHOLD = 100; // max particles per task
+    private static final int THRESHOLD = 200; // max particles per task
     private final List<Particle> particles;
     private final int start, end;
     private final SimulationPanel panel;
@@ -129,9 +129,9 @@ class SimulationPanel extends JPanel {
     private final List<Particle> particles; // all particles 
     private final double hz = 0.016; // timestep in seconds 
     private final double radius = 10.0; // interaction radius in pixels 
-    private final double restDensity = 0.8; // rest density for SPH 
-    private final double gasConstant = 10000.0; // pressure constant 
-    private final double viscCoeff = 500.0; // viscosity coefficient 
+    private final double restDensity = .3; // rest density for SPH 
+    private final double gasConstant = 7000.0; // pressure constant 
+    private final double viscCoeff = 300.0; // viscosity coefficient 
     private final double gravity = 9.81; // gravity acceleration 
     private final Map<CellKey, List<Particle>> grid = new HashMap<>(); // spatial hash grid 
     private final int drawRadius = 6; // radius to draw each particle
