@@ -3,6 +3,10 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import javax.swing.SwingUtilities;
 
 public class Main extends JFrame {
     private final List<Particle> particles = new ArrayList<>();
@@ -39,6 +43,7 @@ public class Main extends JFrame {
     }
 
     private void stepSimulation() {
+        panel.attemptSpawn();
         panel.spatialHash(); // build grid for neighbor search 
 
         // parallel density computation 
@@ -56,7 +61,11 @@ public class Main extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Main::new); // start GUI on event thread 
     }
+
+    
 }
+
+
 
 // recursive for computing density in parallel
 class DensityTask extends RecursiveAction {
@@ -135,10 +144,47 @@ class SimulationPanel extends JPanel {
     private final double gravity = 9.81; // gravity acceleration 
     private final Map<CellKey, List<Particle>> grid = new HashMap<>(); // spatial hash grid 
     private final int drawRadius = 6; // radius to draw each particle
-
+    
+    private volatile boolean leftDown = false, rightDown = false;
+    private volatile Point mousePos = new Point();
+    private long lastSpawn = 0;
+    private final int SPAWN_INTERVAL_MS = 100;  // 10 particles a sec
+    
     public SimulationPanel(List<Particle> particles) {
         this.particles = particles;
         setDoubleBuffered(true); // enable double-buffering for smoother rendering
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mousePos.setLocation(e.getX(), e.getY());
+                if (SwingUtilities.isLeftMouseButton(e))  leftDown = true;
+                else if (SwingUtilities.isRightMouseButton(e)) rightDown = true;
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e))  leftDown = false;
+                else if (SwingUtilities.isRightMouseButton(e)) rightDown = false;
+            }
+        });
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                mousePos.setLocation(e.getX(), e.getY());
+            }
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                mousePos.setLocation(e.getX(), e.getY());
+            }
+        });
+    }
+
+    public void attemptSpawn() { // if left is being clicked, simple cerate new point objects 
+        if (!leftDown) return;
+        long now = System.currentTimeMillis();
+        if (now - lastSpawn < SPAWN_INTERVAL_MS) return;
+        lastSpawn = now;
+        particles.add(new Particle(mousePos.x, mousePos.y, 10.0));
     }
 
     @Override
@@ -150,6 +196,8 @@ class SimulationPanel extends JPanel {
             g.fillOval((int)(p.x - drawRadius), (int)(p.y - drawRadius), 2 * drawRadius, 2 * drawRadius);
         }
     }
+
+    
 
     // Build spatial hash: assign particles to cells 
     public void spatialHash() {
@@ -225,6 +273,18 @@ class SimulationPanel extends JPanel {
         }
         p.ax = p.ax / p.density;
         p.ay = p.ay / p.density;
+        if (rightDown) {
+            double dxm = mousePos.x - p.x;
+            double dym = mousePos.y - p.y;
+            double rm = Math.hypot(dxm, dym);
+            double attractRadius = 100.0;
+            if (rm < attractRadius && rm > 1e-3) {
+                // simple spring‐like pull: strength falls off with distance
+                double pullStrength = 10.0 * (1.0 - rm/attractRadius);
+                p.ax += pullStrength * (dxm / rm) / p.density;
+                p.ay += pullStrength * (dym / rm) / p.density;
+            }
+        }
         p.ay += gravity; // add gravity 
     }
 
