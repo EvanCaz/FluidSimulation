@@ -13,17 +13,17 @@ public class Main extends JFrame {
     private final SimulationPanel panel;
     private ForkJoinPool pool; // will be initialized later
     private final ScheduledExecutorService simulationExecutor = Executors.newSingleThreadScheduledExecutor();
+    public static double mass = 10.0;
 
     public Main() {
         super("Simulation"); // set window title 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 1000); // set window size in pixels 
-
         // Initialize particles in a grid formation 
         for (int i = 0; i < 3000; i++) {                         
             double x = 100 + (i % 20) * 7;
             double y = 100 + (i / 20) * 5;
-            particles.add(new Particle(x, y, 10.0)); // mass is constant 
+            particles.add(new Particle(x, y, mass)); // mass is constant 
         }
         
         panel = new SimulationPanel(particles);
@@ -102,7 +102,7 @@ class DensityTask extends RecursiveAction {
 
 // RecursiveAction for computing forces in parallel
 class ForceTask extends RecursiveAction {
-    private static final int THRESHOLD = 100; // max particles per task (reduced for balance)
+    private static final int THRESHOLD = 700; // max particles per task 
     private final List<Particle> particles;
     private final int start, end;
     private final SimulationPanel panel;
@@ -119,7 +119,7 @@ class ForceTask extends RecursiveAction {
         int length = end - start;
         if (length <= THRESHOLD) {
             for (int i = start; i < end; i++) {
-                panel.computeForcesFor(particles.get(i)); // force for one particle logic)
+                panel.computeForcesFor(particles.get(i)); // force for one particle logic
             }
         } else {
             int mid = start + length / 2;
@@ -133,17 +133,17 @@ class ForceTask extends RecursiveAction {
     }
 }
 
- // Panel handling both rendering and simulation data structures
+ // panel handling both rendering and simulation 
 class SimulationPanel extends JPanel {
     private final List<Particle> particles; // all particles 
     private final double hz = 0.016; // timestep in seconds 
     private final double radius = 10.0; // interaction radius in pixels 
-    private final double restDensity = .28; // rest density for SPH 
-    private final double gasConstant = 7000.0; // pressure constant 
-    private final double viscCoeff = 1000.0; // viscosity coefficient 
+    private final double restDensity = .4; // rest density for SPH, smaller particles are farhter apart, larger they wanna sit closer
+    private final double gasConstant = 100000.0; // pressure constant 
+    private final double viscCoeff = 700.0; // viscosity coefficient 
     private final double gravity = 9.81; // gravity acceleration 
     private final Map<CellKey, List<Particle>> grid = new HashMap<>(); // spatial hash grid 
-    private final int drawRadius = 6; // radius to draw each particle
+    private final int drawRadius = 5; // radius to draw each particle
     
     private long   fpsLastTime   = System.currentTimeMillis();
     private int    fpsFrameCount = 0;
@@ -192,7 +192,7 @@ class SimulationPanel extends JPanel {
             double angle = 2 * Math.PI * i / 10; // make a circle
             double x = mousePos.x + 20 * Math.cos(angle);
             double y = mousePos.y + 20 * Math.sin(angle);
-            particles.add(new Particle(x, y, 10.0));
+            particles.add(new Particle(x, y, Main.mass));
         }
     }
 
@@ -217,7 +217,7 @@ class SimulationPanel extends JPanel {
         g.setColor(Color.BLACK);
         g.drawString(status, x, y);
 
-        final double maxSpeed = 150.0;
+        final double maxSpeed = 120.0;
 
         for (Particle p : particles) {
             double speed = Math.hypot(p.vx, p.vy);
