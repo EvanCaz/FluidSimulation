@@ -14,9 +14,9 @@ Gas Constant or sitffness controlls preassure scalling, large makes huge preassu
 Viscocity dampens interactions, higher means a "thicker" simulation. 
 Restituiton controls how particles interact with boundaries.
 
-## Running the tests
+## Example
 
-Explain how to run the automated tests for this system
+<video src='your URL here' width=180/>
 
 ### Break down into end to end tests
 
