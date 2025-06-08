@@ -16,7 +16,10 @@ Restituiton controls how particles interact with boundaries.
 
 ## Example
 
-<video src='your URL here' width=180/>
+
+https://github.com/user-attachments/assets/74b949e8-2215-4395-ae8e-80cf45fb3c81
+
+
 
 ### Break down into end to end tests
 
