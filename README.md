@@ -1,45 +1,22 @@
 # Fluid Simulation
 
-The purpose of this project is to create a particle based fluid simulation in java with swing. I was inspired by my discovery of Antz being the first practical use of a fluid simulation that was not animated by hand. Animators were given two tools to create their worls, a hose like structure that produced the water and ways to define solid surfaces for the water to interact with. Because of this, in my java code, I want to be able generate particles with a click and define a solid cube. 
+The purpose of this project is to create a particle-based fluid simulation in Java with Swing. I was inspired by my discovery of Antz being the first practical use of a fluid simulation that was not animated by hand. Animators were given two tools to create their worlds: a hose-like structure that produced the water and ways to define solid surfaces for the water to interact with. Because of this, in my Java code, I want to be able to generate particles and move them around. 
 
 ## Main Ideas
 
-I want this to be created in java so it can be compiled and run wihtout external libraries or dependencies and even turned into executable. 
+I want this to be created in Java so it can be compiled and run without external dependencies and even turned into an executable. 
 
-Based on the papers I read, the particles in the simulation, AKA Smoother Particle Hydrodynamics(SPH), have five main attributes: velocity, acceleration, density, pressure, and the location. The calculate these properties, we only use the "quantities in a local neighborhood of each particle using radial symmetrical smoothing kernels". 
+Based on the papers I read, the simulation uses Smoothed Particle Hydrodynamics (SPH), where each particle carries physical properties like velocity, density, etc. To calculate the properties, we use the following ideas:
 
-Radius is defined by us and helps limit the area of interaction(so only the particles in this area effect density and forces) made as well as the spatial map for checking the closest 8 plus current grid for calculations not the entire window. 
-Rest density is the target density where no preassure is created, smaller means particles sit farther apart. 
-Gas Constant or sitffness controlls preassure scalling, large makes huge preassure forces aka incompressible, small does opposite. 
-Viscocity dampens interactions, higher means a "thicker" simulation. 
-Restituiton controls how particles interact with boundaries.
+Radius is defined by us and helps limit the area of interaction (so only the particles in this area affect density and forces), made with a spatial map for checking the closest eight, plus the current grid (size defined by us) for calculations, not the entire window. 
+Rest density is the target density where no pressure is created; smaller means particles sit farther apart. A particle's rest density influences the particle's pressure as defined by Pi = K(Pi – P0). Where P0 is the rest density.
+Gas Constant or stiffness controls pressure scaling, large makes huge pressure forces, aka incompressible, small does the opposite. The gas constant is K in the above formula. 
+Viscosity dampens interactions; higher means a "thicker" simulation. This metric makes faster-moving particle groups try and match those surrounding it by something out velocity, kind of a friction. 
+Restitution controls how particles interact with boundaries, where lower means perfectly bounce.
 
 ## Example
 
-
 https://github.com/user-attachments/assets/74b949e8-2215-4395-ae8e-80cf45fb3c81
-
-
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
 
 ## Acknowledgments
 
